@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "mocha --timeout 5000 --ui tdd tests/2_functional-tests.js"
+    "test": "mocha --timeout 5000 --ui tdd --exit tests/2_functional-tests.js"
   },
   "dependencies": {
     "@types/node": "^26.6.5",

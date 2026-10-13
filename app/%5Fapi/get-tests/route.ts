@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const type = url.searchParams.get('type');
+  const n = url.searchParams.get('n');
 
   try {
     const filePath = path.join(process.cwd(), 'tests', '2_functional-tests.js');
@@ -31,12 +32,19 @@ export async function GET(req: Request) {
       });
     }
 
-    let result = allTests;
+    let out = allTests;
     if (type === 'functional') {
-      result = allTests.filter((t) => !t.title.includes('#example'));
+      out = allTests.filter((t) => t.context.includes('Functional Tests') && !t.title.includes('#example'));
+    } else if (type === 'unit') {
+      out = allTests.filter((t) => t.context.includes('Unit Tests'));
     }
 
-    return Response.json(result);
+    if (n !== null && n !== undefined) {
+      const idx = parseInt(n, 10);
+      return Response.json(out[idx] || out);
+    }
+
+    return Response.json(out);
   } catch (err) {
     return Response.json({ error: 'Unable to load tests' }, { status: 500 });
   }

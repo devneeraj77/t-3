@@ -14,4 +14,4 @@ const bookSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('Book', bookSchema);
+module.exports = mongoose.models.Book || mongoose.model('Book', bookSchema);
