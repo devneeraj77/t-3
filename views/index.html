@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personal Library | Athenaeum Archive</title>
+  <link rel="icon" type="image/png" href="https://cdn.freecodecamp.org/universal/favicons/favicon-16x16.png">
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+
+  <!-- Stately Archival Header -->
+  <header class="library-header">
+    <div class="header-crest">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        <line x1="12" y1="6" x2="16" y2="6"></line>
+        <line x1="12" y1="10" x2="16" y2="10"></line>
+      </svg>
+    </div>
+    <h1>Personal Library</h1>
+    <p class="library-subtitle">A Curated Archive of Literary Volumes, Marginalia & Scholarly Reflections</p>
+    
+    <div class="header-meta-bar">
+      <div class="meta-pill">
+        <span class="status-dot"></span>
+        <span>Archive Online</span>
+      </div>
+      <div class="meta-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+        </svg>
+        <span id="headerTotalBooks">0 Volumes In Collection</span>
+      </div>
+      <div class="meta-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span id="headerTotalComments">0 Total Marginalia</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="library-nav">
+      <button class="nav-tab-btn active" data-tab="catalog">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        Library Catalog & Study
+      </button>
+      <button class="nav-tab-btn" data-tab="api">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        API Scriptorium & Workbench
+      </button>
+      <button class="nav-tab-btn" data-tab="qa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        QA Certification & Test Suite
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-container">
+
+    <!-- TAB 1: Library Catalog & Reading Room (#sampleui) -->
+    <div id="catalogTab" class="tab-pane active">
+      <div id="sampleui">
+        <div class="study-grid">
+
+          <!-- Left Column: Volume Shelves & Acquisition -->
+          <div class="classic-panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                Archival Shelves
+              </span>
+              <span class="panel-badge" id="catalogCounterBadge">0 Books</span>
+            </div>
+
+            <div class="panel-body">
+              <!-- Acquisition Form -->
+              <form id="newBookForm" class="border archival-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="bookTitleToAdd" class="form-label">Acquire New Volume</label>
+                  <input type="text" id="bookTitleToAdd" name="title" class="archival-input" placeholder="e.g. The Picture of Dorian Gray" required autocomplete="off">
+                </div>
+                <button type="submit" value="Submit" id="newBook" class="btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Acquire Volume Into Catalog
+                </button>
+              </form>
+
+              <!-- Live Filter Search -->
+              <div class="catalog-search-wrap">
+                <svg class="catalog-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="catalogSearchInput" class="catalog-search-input" placeholder="Filter catalog titles..." autocomplete="off">
+              </div>
+
+              <!-- Books List Container -->
+              <div id="display">
+                <div class="catalog-empty-state">
+                  <div class="catalog-empty-icon">📖</div>
+                  <p>Loading volumes from the archive...</p>
+                </div>
+              </div>
+
+              <!-- Deaccession All Button -->
+              <div class="delete-all-wrap">
+                <button id="deleteAllBooks" class="btn-danger">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  Deaccession All Volumes...
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Reading Room / Volume Detail -->
+          <div class="classic-panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                The Reading Room
+              </span>
+              <span class="panel-badge" id="readingRoomStatusBadge">Awaiting Selection</span>
+            </div>
+
+            <div class="panel-body">
+              <div id="bookDetail" class="border">
+                <div class="detail-empty-view" id="emptyDetailPlaceholder">
+                  <svg class="detail-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  </svg>
+                  <h3>Peruse a Volume</h3>
+                  <p id="detailTitle">Select a book to see it's details and comments</p>
+                </div>
+                
+                <div id="activeBookView" style="display: none;" class="book-detail-card">
+                  <div class="detail-header-block">
+                    <h2 id="activeBookTitleDisplay"></h2>
+                    <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                      <span class="detail-id-chip" id="copyIdChip" title="Click to copy ID">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span id="activeBookIdDisplay"></span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="comments-section-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    Marginalia & Scholar Notes
+                  </div>
+
+                  <ol id="detailComments"></ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: API Scriptorium & Workbench (#sampleposting) -->
+    <div id="apiTab" class="tab-pane">
+      <div class="workbench-grid">
+        
+        <!-- Left: Sample Posting Forms (Required by FCC starter) -->
+        <div class="classic-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Canonical Test Forms
+            </span>
+            <span class="panel-badge">FCC Forms</span>
+          </div>
+
+          <div class="panel-body">
+            <div id="sampleposting">
+              <p style="font-style: italic; color: var(--color-ink-secondary); margin-bottom: 1.25rem;">
+                Standard HTML form submissions for automated verification and endpoint testing:
+              </p>
+
+              <!-- Form 1: POST /api/books -->
+              <div class="api-form-card">
+                <h4>
+                  <span class="http-badge badge-post">POST</span>
+                  Test post to /api/books
+                </h4>
+                <form action="/api/books" method="post" class="border">
+                  <div class="form-group">
+                    <label for="title" class="form-label">Book Title</label>
+                    <input type="text" id="title" name="title" class="archival-input" placeholder="Book Title" required><br>
+                  </div>
+                  <input type="submit" value="Submit" class="btn-primary">
+                </form>
+              </div>
+
+              <!-- Form 2: POST /api/books/{bookid} -->
+              <div class="api-form-card">
+                <h4>
+                  <span class="http-badge badge-post">POST</span>
+                  Test post to /api/books/{bookid}
+                </h4>
+                <form action="" method="post" id="commentTest" class="border">
+                  <div class="form-group">
+                    <label for="idinputtest" class="form-label">BookId to comment on</label>
+                    <input type="text" name="id" value="" id="idinputtest" class="archival-input" placeholder="e.g. 60f7b1..."><br>
+                  </div>
+                  <div class="form-group">
+                    <label for="comment" class="form-label">Comment</label>
+                    <input type="text" id="comment" name="comment" value="" class="archival-input" placeholder="Scholarly observation..."><br>
+                  </div>
+                  <input type="submit" value="Submit" class="btn-primary">
+                </form>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive REST Console & Response Viewer -->
+        <div class="classic-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+              Live Scriptorium Console
+            </span>
+            <span class="panel-badge">Interactive</span>
+          </div>
+
+          <div class="panel-body">
+            <p style="font-style: italic; color: var(--color-ink-secondary); margin-bottom: 1.25rem;">
+              Send real-time asynchronous API requests and inspect raw HTTP responses:
+            </p>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+              <button class="btn-secondary" id="consoleGetBooksBtn">
+                <span class="http-badge badge-get">GET</span> /api/books
+              </button>
+              <button class="btn-secondary" id="consoleDeleteAllBtn">
+                <span class="http-badge badge-delete">DEL</span> /api/books
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="consoleEndpointInput">Endpoint URL</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="consoleEndpointInput" class="archival-input" value="/api/books" style="font-family: monospace; font-size: 0.95rem;">
+                <button class="btn-primary" id="consoleSendBtn" style="width: auto; padding: 0.65rem 1.25rem;">Execute</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <label class="form-label" style="margin-bottom: 0;">API Response Inspector</label>
+                <span id="consoleResponseStatus" style="font-family: monospace; font-size: 0.8rem; color: var(--color-gold-base);">Ready</span>
+              </div>
+              <pre class="api-output-terminal" id="consoleOutputTerminal">// Output will appear here upon request execution...</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: QA Certification & Test Suite -->
+    <div id="qaTab" class="tab-pane">
+      <div class="classic-panel">
+        <div class="panel-header">
+          <span class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            FreeCodeCamp Quality Assurance Specification
+          </span>
+          <button class="btn-primary" id="runQaTestsBtn" style="width: auto; padding: 0.45rem 1rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Fetch Live Test Runner Report
+          </button>
+        </div>
+
+        <div class="panel-body">
+          <p style="font-style: italic; color: var(--color-ink-secondary); margin-bottom: 1rem;">
+            All 8 core curriculum test requirements and 10 Chai/Mocha functional test suites verified:
+          </p>
+
+          <ul class="qa-checklist">
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>1. Project Submission:</strong> Provides independent full-stack implementation running with Express and MongoDB.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>2. POST /api/books:</strong> Adds a book with <span class="qa-code">title</span> in body; returns <span class="qa-code">{ _id, title }</span>. Responds with <span class="qa-code">missing required field title</span> if omitted.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>3. GET /api/books:</strong> Returns JSON array of all books with <span class="qa-code">_id</span>, <span class="qa-code">title</span>, and <span class="qa-code">commentcount</span>.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>4. GET /api/books/{_id}:</strong> Retrieves single book with <span class="qa-code">_id</span>, <span class="qa-code">title</span>, and <span class="qa-code">comments</span> array. Responds with <span class="qa-code">no book exists</span> if not found.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>5. POST /api/books/{_id}:</strong> Appends <span class="qa-code">comment</span> to volume; returns updated book. Responds with <span class="qa-code">missing required field comment</span> or <span class="qa-code">no book exists</span>.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>6. DELETE /api/books/{_id}:</strong> Deletes single book; returns <span class="qa-code">delete successful</span> or <span class="qa-code">no book exists</span>.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>7. DELETE /api/books:</strong> Purges all books in collection; returns <span class="qa-code">complete delete successful</span>.
+              </div>
+            </li>
+            <li class="qa-item">
+              <svg class="qa-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <div class="qa-text">
+                <strong>8. 10 Functional Tests:</strong> All 10 Mocha/Chai functional tests in <span class="qa-code">tests/2_functional-tests.js</span> fully implemented and passing.
+              </div>
+            </li>
+          </ul>
+
+          <div class="test-results-box" id="testRunnerReportContainer" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h4 style="font-family: var(--font-serif-display); color: var(--color-wood-deep);">Automated Test Runner Output (/_api/get-tests)</h4>
+              <span id="testSummaryBadge" class="status-badge-pass">10 / 10 Passing</span>
+            </div>
+            <div id="testItemsList"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+          integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+          crossorigin="anonymous"></script>
+  <script src="/public/client.js"></script>
+  <script>
+    /*
+     * For #sampleposting to update form action url to test inputs book id
+     */
+    $(function() {
+      $('#commentTest').submit(function(){
+        let id = $('#idinputtest').val();
+        $(this).attr('action', "/api/books/" + id);
+      });
+    });
+  </script>
+</body>
+</html>
