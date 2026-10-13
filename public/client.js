@@ -1,26 +1,63 @@
 /**
- * Athenaeum Personal Library - Client Application
- * Compatible with all FreeCodeCamp QA requirements and DOM contracts
+ * LibraryOS - Modern Personal Library Client
+ * Fully complies with FreeCodeCamp QA specifications and DOM contracts
  */
 
 $(document).ready(function() {
   let itemsRaw = [];
   let currentSelectedBookId = null;
 
-  // Notification Toast Helper
+  // --- Theme Management ---
+  const savedTheme = localStorage.getItem('libraryos-theme') || 'dark';
+  applyTheme(savedTheme);
+
+  $('#themeToggleBtn').click(function() {
+    const currentTheme = $('html').attr('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+  });
+
+  function applyTheme(theme) {
+    $('html').attr('data-theme', theme);
+    localStorage.setItem('libraryos-theme', theme);
+    if (theme === 'light') {
+      $('#themeMoonIcon').hide();
+      $('#themeSunIcon').show();
+    } else {
+      $('#themeMoonIcon').show();
+      $('#themeSunIcon').hide();
+    }
+  }
+
+  // --- Toast Notifications ---
   function showToast(message, type = 'info') {
     const $toast = $('<div class="toast"/>').text(message);
     if (type === 'error') {
-      $toast.css('border-color', '#E53E3E').css('color', '#FEB2B2');
+      $toast.css('border-color', 'var(--accent-rose)').css('color', 'var(--accent-rose)');
     } else if (type === 'success') {
-      $toast.css('border-color', '#48BB78').css('color', '#C6F6D5');
+      $toast.css('border-color', 'var(--accent-emerald)').css('color', 'var(--accent-emerald)');
     }
     $('#toastContainer').append($toast);
     setTimeout(function() {
-      $toast.fadeOut(400, function() {
+      $toast.fadeOut(300, function() {
         $(this).remove();
       });
-    }, 3200);
+    }, 3000);
+  }
+
+  // Generate Deterministic Gradient & Initials for Book Avatar
+  function getBookCoverStyle(title) {
+    let hash = 0;
+    for (let i = 0; i < title.length; i++) {
+      hash = title.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h1 = Math.abs(hash % 360);
+    const h2 = (h1 + 40) % 360;
+    const initial = title.trim().charAt(0).toUpperCase() || 'B';
+    return {
+      gradient: `linear-gradient(135deg, hsl(${h1}, 75%, 55%), hsl(${h2}, 85%, 45%))`,
+      initial: initial
+    };
   }
 
   // Update Header Totals
@@ -31,9 +68,9 @@ $(document).ready(function() {
       totalComments += (b.commentcount || 0);
     });
 
-    $('#headerTotalBooks').text(totalBooks + (totalBooks === 1 ? ' Volume In Collection' : ' Volumes In Collection'));
-    $('#headerTotalComments').text(totalComments + (totalComments === 1 ? ' Total Marginalia' : ' Total Marginalia'));
-    $('#catalogCounterBadge').text(totalBooks + (totalBooks === 1 ? ' Volume' : ' Volumes'));
+    $('#headerTotalBooks').text(totalBooks + (totalBooks === 1 ? ' Book' : ' Books'));
+    $('#headerTotalComments').text(totalComments + (totalComments === 1 ? ' Note' : ' Notes'));
+    $('#catalogCounterBadge').text(totalBooks + (totalBooks === 1 ? ' Book' : ' Books'));
   }
 
   // Load and Render Books
@@ -44,10 +81,10 @@ $(document).ready(function() {
 
       if (!data || data.length === 0) {
         $('#display').html(
-          '<div class="catalog-empty-state">' +
-            '<div class="catalog-empty-icon">📖</div>' +
-            '<p style="font-weight: 600; color: var(--color-wood-deep); margin-bottom: 0.35rem;">The catalog shelves are currently empty</p>' +
-            '<p style="font-size: 0.95rem;">Acquire your first literary volume above to begin archiving.</p>' +
+          '<div class="empty-state">' +
+            '<svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>' +
+            '<p style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Collection is empty</p>' +
+            '<p style="font-size: 0.85rem;">Create your first book above to begin.</p>' +
           '</div>'
         );
         resetDetailView();
@@ -57,9 +94,8 @@ $(document).ready(function() {
       renderFilteredBooks(data, selectedIdToKeep);
     }).fail(function() {
       $('#display').html(
-        '<div class="catalog-empty-state">' +
-          '<div class="catalog-empty-icon">⚠️</div>' +
-          '<p>Unable to connect to the archive. Ensure server is online.</p>' +
+        '<div class="empty-state">' +
+          '<p>Unable to connect to database. Ensure server is online.</p>' +
         '</div>'
       );
     });
@@ -77,21 +113,28 @@ $(document).ready(function() {
 
       const isSelected = selectedIdToKeep && (val._id === selectedIdToKeep);
       const activeClass = isSelected ? ' active' : '';
+      const cover = getBookCoverStyle(val.title);
 
       items.push(
         '<li class="bookItem' + activeClass + '" id="' + i + '" data-bookid="' + val._id + '">' +
-          '<div class="book-item-title">' + escapeHtml(val.title) + '</div>' +
-          '<div class="book-item-meta">' +
-            '<span class="book-comment-tag">✒️ ' + val.commentcount + (val.commentcount === 1 ? ' note' : ' notes') + '</span>' +
+          '<div class="book-item-content">' +
+            '<div class="book-avatar" style="background: ' + cover.gradient + ';">' + cover.initial + '</div>' +
+            '<div class="book-info">' +
+              '<div class="book-item-title">' + escapeHtml(val.title) + '</div>' +
+            '</div>' +
           '</div>' +
+          '<span class="book-comment-tag">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> ' +
+            val.commentcount +
+          '</span>' +
         '</li>'
       );
     });
 
     if (items.length === 0) {
       $('#display').html(
-        '<div class="catalog-empty-state">' +
-          '<p>No volumes found matching "' + escapeHtml(searchTerm) + '"</p>' +
+        '<div class="empty-state">' +
+          '<p>No books matching "' + escapeHtml(searchTerm) + '"</p>' +
         '</div>'
       );
       return;
@@ -118,14 +161,14 @@ $(document).ready(function() {
     const selectedBook = itemsRaw[index];
     currentSelectedBookId = selectedBook._id;
 
-    // Highlight in list
+    // Highlight active in list
     $('.bookItem').removeClass('active');
     $('.bookItem[data-bookid="' + selectedBook._id + '"]').addClass('active');
 
-    // UI state
+    // UI state transitions
     $('#emptyDetailPlaceholder').hide();
     $('#activeBookView').show();
-    $('#readingRoomStatusBadge').text('Perusing Volume');
+    $('#readingRoomStatusBadge').text('Active Volume');
 
     // Canonical FCC ID #detailTitle format
     $('#detailTitle').html('<b>' + escapeHtml(selectedBook.title) + '</b> (id: ' + selectedBook._id + ')');
@@ -138,26 +181,34 @@ $(document).ready(function() {
       const commentList = data.comments || [];
 
       if (commentList.length === 0) {
-        comments.push('<li class="no-comments-msg">No marginalia recorded for this volume yet. Add the inaugural scholarly note below.</li>');
+        comments.push('<li class="no-comments-msg">No discussion notes yet. Leave the first note below!</li>');
       } else {
         $.each(commentList, function(i, val) {
-          comments.push('<li>' + escapeHtml(val) + '</li>');
+          comments.push(
+            '<li>' +
+              '<span class="comment-bullet"></span>' +
+              '<span>' + escapeHtml(val) + '</span>' +
+            '</li>'
+          );
         });
       }
 
       // Canonical FCC form & buttons structure inside #detailComments container
       comments.push(
-        '<div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--color-border);">' +
+        '<div style="margin-top: 1.4rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">' +
           '<form id="newCommentForm" onsubmit="return false;" class="comment-input-wrap">' +
-            '<label class="form-label" for="commentToAdd">Record Scholarly Annotation</label>' +
-            '<input style="width:100%" type="text" class="archival-input form-control" id="commentToAdd" name="comment" placeholder="Affix scholarly marginalia..." autocomplete="off">' +
+            '<label class="form-label" for="commentToAdd">New Comment</label>' +
+            '<div class="input-icon-wrap">' +
+              '<svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' +
+              '<input style="width:100%" type="text" class="modern-input form-control" id="commentToAdd" name="comment" placeholder="Write a comment..." autocomplete="off">' +
+            '</div>' +
           '</form>' +
           '<div class="detail-actions-row">' +
-            '<button class="btn-primary addComment" id="' + data._id + '">' +
+            '<button class="btn-modern-primary addComment" id="' + data._id + '">' +
               '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> ' +
               'Add Comment' +
             '</button>' +
-            '<button class="btn-danger deleteBook" id="' + data._id + '">' +
+            '<button class="btn-modern-danger deleteBook" id="' + data._id + '">' +
               '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> ' +
               'Delete Book' +
             '</button>' +
@@ -167,18 +218,18 @@ $(document).ready(function() {
 
       $('#detailComments').html(comments.join(''));
     }).fail(function() {
-      showToast('Could not retrieve volume annotations', 'error');
+      showToast('Could not load book comments', 'error');
     });
   }
 
-  // Reset Reading Room Detail View
+  // Reset Detail View
   function resetDetailView() {
     currentSelectedBookId = null;
     $('#activeBookView').hide();
     $('#emptyDetailPlaceholder').show();
     $('#detailTitle').text("Select a book to see it's details and comments");
     $('#detailComments').empty();
-    $('#readingRoomStatusBadge').text('Awaiting Selection');
+    $('#readingRoomStatusBadge').text('No Selection');
     $('.bookItem').removeClass('active');
   }
 
@@ -194,13 +245,13 @@ $(document).ready(function() {
     const commentVal = $('#commentToAdd').val();
 
     if (!commentVal || !commentVal.trim()) {
-      showToast('Annotation text cannot be blank', 'error');
+      showToast('Comment text cannot be empty', 'error');
       $('#commentToAdd').focus();
       return;
     }
 
     const $btn = $(this);
-    $btn.prop('disabled', true).text('Affixing note...');
+    $btn.prop('disabled', true).text('Posting...');
 
     $.ajax({
       url: '/api/books/' + bookId,
@@ -208,11 +259,11 @@ $(document).ready(function() {
       dataType: 'json',
       data: $('#newCommentForm').serialize(),
       success: function(data) {
-        showToast('Marginalia recorded successfully', 'success');
+        showToast('Comment posted successfully!', 'success');
         loadBooks(bookId);
       },
       error: function(xhr) {
-        showToast(xhr.responseText || 'Error adding annotation', 'error');
+        showToast(xhr.responseText || 'Error adding comment', 'error');
         $btn.prop('disabled', false).text('Add Comment');
       }
     });
@@ -222,25 +273,25 @@ $(document).ready(function() {
   $('#bookDetail').on('click', 'button.deleteBook', function(e) {
     e.preventDefault();
     const bookId = this.id;
-    const bookTitle = $('#activeBookTitleDisplay').text() || 'this volume';
+    const bookTitle = $('#activeBookTitleDisplay').text() || 'this book';
 
-    if (!confirm('Are you certain you wish to deaccession "' + bookTitle + '" from the archives?')) {
+    if (!confirm('Are you sure you want to delete "' + bookTitle + '"?')) {
       return;
     }
 
     const $btn = $(this);
-    $btn.prop('disabled', true).text('Deaccessioning...');
+    $btn.prop('disabled', true).text('Deleting...');
 
     $.ajax({
       url: '/api/books/' + bookId,
       type: 'delete',
       success: function(response) {
-        showToast(response || 'Volume deaccessioned successfully', 'success');
+        showToast(response || 'Book deleted successfully', 'success');
         resetDetailView();
         loadBooks();
       },
       error: function(xhr) {
-        showToast(xhr.responseText || 'Error deleting volume', 'error');
+        showToast(xhr.responseText || 'Error deleting book', 'error');
         $btn.prop('disabled', false).text('Delete Book');
       }
     });
@@ -250,13 +301,13 @@ $(document).ready(function() {
   function submitNewBook() {
     const titleVal = $('#bookTitleToAdd').val();
     if (!titleVal || !titleVal.trim()) {
-      showToast('Please enter a book title to acquire', 'error');
+      showToast('Please enter a book title', 'error');
       $('#bookTitleToAdd').focus();
       return;
     }
 
     const $btn = $('#newBook');
-    $btn.prop('disabled', true).text('Acquiring Volume...');
+    $btn.prop('disabled', true).text('Creating...');
 
     $.ajax({
       url: '/api/books',
@@ -266,14 +317,14 @@ $(document).ready(function() {
       success: function(newBook) {
         $('#bookTitleToAdd').val('');
         $btn.prop('disabled', false).html(
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Acquire Volume Into Catalog'
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Create Book'
         );
-        showToast('Acquired "' + newBook.title + '" into the archive!', 'success');
+        showToast('Added "' + newBook.title + '" to collection!', 'success');
         loadBooks(newBook._id);
       },
       error: function(xhr) {
-        $btn.prop('disabled', false).text('Acquire Volume Into Catalog');
-        showToast(xhr.responseText || 'Error acquiring volume', 'error');
+        $btn.prop('disabled', false).text('Create Book');
+        showToast(xhr.responseText || 'Error creating book', 'error');
       }
     });
   }
@@ -292,29 +343,29 @@ $(document).ready(function() {
   $('#deleteAllBooks').click(function(e) {
     e.preventDefault();
     if (!itemsRaw || itemsRaw.length === 0) {
-      showToast('The catalog is already devoid of volumes.', 'info');
+      showToast('Collection is already empty.', 'info');
       return;
     }
 
-    if (!confirm('CAUTION: Deaccessioning all volumes will permanently purge the entire catalog. Proceed?')) {
+    if (!confirm('Are you sure you want to delete ALL books? This action cannot be undone.')) {
       return;
     }
 
     const $btn = $(this);
-    $btn.prop('disabled', true).text('Purging catalog...');
+    $btn.prop('disabled', true).text('Deleting...');
 
     $.ajax({
       url: '/api/books',
       type: 'delete',
       success: function(response) {
-        showToast(response || 'Complete delete successful', 'success');
+        showToast(response || 'All books deleted successfully', 'success');
         resetDetailView();
         loadBooks();
-        $btn.prop('disabled', false).text('Deaccession All Volumes...');
+        $btn.prop('disabled', false).text('Delete All Books');
       },
       error: function(xhr) {
-        showToast(xhr.responseText || 'Error purging catalog', 'error');
-        $btn.prop('disabled', false).text('Deaccession All Volumes...');
+        showToast(xhr.responseText || 'Error deleting all books', 'error');
+        $btn.prop('disabled', false).text('Delete All Books');
       }
     });
   });
@@ -329,7 +380,7 @@ $(document).ready(function() {
     const id = $('#activeBookIdDisplay').text();
     if (id && navigator.clipboard) {
       navigator.clipboard.writeText(id).then(function() {
-        showToast('Volume ID copied to clipboard: ' + id, 'success');
+        showToast('ID copied to clipboard!', 'success');
       });
     }
   });
@@ -351,7 +402,7 @@ $(document).ready(function() {
   });
 
   $('#consoleDeleteAllBtn').click(function() {
-    if (confirm('Execute DELETE /api/books from the Scriptorium Console?')) {
+    if (confirm('Execute DELETE /api/books from console?')) {
       $('#consoleEndpointInput').val('/api/books');
       executeConsoleRequest('DELETE', '/api/books');
     }
@@ -401,7 +452,7 @@ $(document).ready(function() {
       $('#testRunnerReportContainer').slideDown();
 
       if (!Array.isArray(tests) || tests.length === 0) {
-        $('#testItemsList').html('<p style="color: var(--color-ink-muted);">Test runner returned no functional tests. Ensure NODE_ENV=test.</p>');
+        $('#testItemsList').html('<p style="color: var(--text-muted);">No functional tests found. Ensure NODE_ENV=test.</p>');
         return;
       }
 
@@ -410,18 +461,18 @@ $(document).ready(function() {
 
       const rows = tests.map(function(t, idx) {
         return (
-          '<div class="test-report-row">' +
+          '<div class="test-row">' +
             '<div>' +
               '<strong>#' + (idx + 1) + ' ' + escapeHtml(t.title) + '</strong><br>' +
-              '<span style="font-size: 0.8rem; color: var(--color-ink-muted);">' + escapeHtml(t.context || '') + ' (' + (t.assertions ? t.assertions.length : 0) + ' assertions)</span>' +
+              '<span style="font-size: 0.78rem; color: var(--text-muted);">' + escapeHtml(t.context || '') + ' (' + (t.assertions ? t.assertions.length : 0) + ' assertions)</span>' +
             '</div>' +
-            '<span class="status-badge-pass">' + escapeHtml(t.state ? t.state.toUpperCase() : 'PASS') + '</span>' +
+            '<span class="badge-pass">' + escapeHtml(t.state ? t.state.toUpperCase() : 'PASS') + '</span>' +
           '</div>'
         );
       });
 
       $('#testItemsList').html(rows.join(''));
-      showToast('Test runner report loaded: ' + passedCount + '/' + tests.length + ' tests passed!', 'success');
+      showToast('Test report loaded: ' + passedCount + '/' + tests.length + ' passing!', 'success');
     }).fail(function() {
       $btn.prop('disabled', false).text('Fetch Live Test Runner Report');
       showToast('Could not fetch test report. Check server logs.', 'error');
