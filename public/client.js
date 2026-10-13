@@ -45,17 +45,27 @@ $(document).ready(function() {
     }, 3000);
   }
 
-  // Generate Deterministic Gradient & Initials for Book Avatar
+  // Generate Deterministic Professional Theme & Initials for Book Avatar
   function getBookCoverStyle(title) {
     let hash = 0;
     for (let i = 0; i < title.length; i++) {
       hash = title.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const h1 = Math.abs(hash % 360);
-    const h2 = (h1 + 40) % 360;
+    const palettes = [
+      { gradient: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)', badge: 'rgba(59, 130, 246, 0.15)', text: '#60A5FA' }, // Sapphire
+      { gradient: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)', badge: 'rgba(20, 184, 166, 0.15)', text: '#2DD4BF' }, // Deep Teal
+      { gradient: 'linear-gradient(135deg, #3730A3 0%, #6366F1 100%)', badge: 'rgba(99, 102, 241, 0.15)', text: '#818CF8' }, // Indigo
+      { gradient: 'linear-gradient(135deg, #065F46 0%, #10B981 100%)', badge: 'rgba(16, 185, 129, 0.15)', text: '#34D399' }, // Emerald
+      { gradient: 'linear-gradient(135deg, #334155 0%, #64748B 100%)', badge: 'rgba(100, 116, 139, 0.15)', text: '#94A3B8' }, // Slate Steel
+      { gradient: 'linear-gradient(135deg, #854D0E 0%, #D97706 100%)', badge: 'rgba(217, 119, 6, 0.15)', text: '#FBBF24' },  // Polished Bronze
+      { gradient: 'linear-gradient(135deg, #1E3A8A 0%, #0284C7 100%)', badge: 'rgba(2, 132, 199, 0.15)', text: '#38BDF8' }   // Cobalt Cyan
+    ];
+    const index = Math.abs(hash) % palettes.length;
     const initial = title.trim().charAt(0).toUpperCase() || 'B';
     return {
-      gradient: `linear-gradient(135deg, hsl(${h1}, 75%, 55%), hsl(${h2}, 85%, 45%))`,
+      gradient: palettes[index].gradient,
+      badge: palettes[index].badge,
+      textColor: palettes[index].text,
       initial: initial
     };
   }
